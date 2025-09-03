@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]  # FastAPIを動かすためのサーバー
+requests
+apscheduler
+pytz
+gunicorn
+python-multipart
+email-validator

@@ -1,0 +1,21 @@
+services:
+  backend:
+    build: ./backend
+    # FastAPIの開発サーバーを起動
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app
+      - ./recordings:/recordings
+    ports:
+      # Macの8000番ポートをコンテナの8000番ポートに接続
+      - "8000:8000"
+    tty: true
+  frontend:
+    build: ./frontend
+    command: npm run dev -- --host --port 3000
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
