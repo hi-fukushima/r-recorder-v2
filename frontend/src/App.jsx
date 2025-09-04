@@ -105,7 +105,7 @@ function App() {
                 {authToken && (
                     <nav>
                         <ul>
-                            <li><strong>Radiko Downloader</strong></li>
+                            <li><strong>R Downloader V2</strong></li>
                         </ul>
                         <ul>
                             <li><Link to="/areas">エリア選択</Link></li>
