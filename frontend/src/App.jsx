@@ -6,6 +6,7 @@ import StationList from './components/StationList';
 import DateSelector from './components/DateSelector';
 import ProgramGuide from './components/ProgramGuide';
 import StatusPage from "./components/StatusPage";
+import SearchPage from "./components/SearchPage";
 import {getToken, setTokens, removeTokens} from './api';
 
 // --- ページコンポーネントの定義 ---
@@ -84,6 +85,8 @@ const GuidePage = () => {
     />;
 };
 
+const Search = () => <SearchPage/>;
+
 function App() {
     // --- 状態管理(State) ---
     // アプリ起動時にlocalStorageからトークンを読み込む
@@ -108,6 +111,7 @@ function App() {
                             <li><strong>R Downloader V2</strong></li>
                         </ul>
                         <ul>
+                            <li><Link to="/search">番組検索</Link></li>
                             <li><Link to="/areas">エリア選択</Link></li>
                             <li><Link to="/status">ダウンロード状況</Link></li>
                             <li><a href="#" role="button" className="contrast" onClick={handleLogout}>ログアウト</a>
@@ -123,6 +127,7 @@ function App() {
                         </>
                     ) : (
                         <>
+                            <Route path="/search" element={<Search/>}/>
                             <Route path="/areas" element={<AreaPage/>}/>
                             <Route path="/stations/:areaId" element={<StationPage/>}/>
                             <Route path="/dates/:stationId" element={<DatePage/>}/>

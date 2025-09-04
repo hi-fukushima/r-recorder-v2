@@ -1,7 +1,7 @@
 import React from 'react';
 import {useState, useEffect} from 'react';
 import {useNavigate, useParams, Link} from 'react-router-dom';
-import {fetchWithAuth} from '../api';
+import {fetchWithAuth, getRadikoToken} from '../api';
 
 function ProgramGuide() {
     const {stationId, dateStr} = useParams();
@@ -33,6 +33,7 @@ function ProgramGuide() {
             program_title: program.title,
             start_time: program.start_time.substring(0, 19).replace(/[-T:]/g, ''),
             end_time: program.end_time.substring(0, 19).replace(/[-T:]/g, ''),
+            radiko_token: getRadikoToken(), // Radikoトークンを追加
         };
 
         try {
@@ -58,6 +59,8 @@ function ProgramGuide() {
         return <article>番組表の読み込みに失敗しました。</article>;
     }
 
+    const now = new Date();
+
     return (
         <article>
             <h2>番組表 ({guide.station_name} - {dateStr})</h2>
@@ -73,26 +76,32 @@ function ProgramGuide() {
                 </tr>
                 </thead>
                 <tbody>
-                {guide.programs.map(prog => (
-                    <tr key={prog.start_time}>
-                        <td>
-                            {prog.image_url ? (
-                                <img src={prog.image_url} alt={prog.title} style={{width: '80px', height: 'auto'}}/>
-                            ) : (
-                                '(画像なし)'
-                            )}
-                        </td>
-                        <td>{new Date(prog.start_time).toLocaleTimeString('ja-JP', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })}</td>
-                        <td>{prog.title}</td>
-                        <td>{prog.pfm}</td>
-                        <td>
-                            <button onClick={() => handleDownload(prog)}>ダウンロード</button>
-                        </td>
-                    </tr>
-                ))}
+                {guide.programs.map(prog => {
+                    const endTime = new Date(prog.end_time);
+                    const isDownloadable = endTime > now;
+                    return (
+                        <tr key={prog.start_time}>
+                            <td>
+                                {prog.image_url ? (
+                                    <img src={prog.image_url} alt={prog.title} style={{width: '80px', height: 'auto'}}/>
+                                ) : (
+                                    '(画像なし)'
+                                )}
+                            </td>
+                            <td>{new Date(prog.start_time).toLocaleTimeString('ja-JP', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}</td>
+                            <td>{prog.title}</td>
+                            <td>{prog.pfm}</td>
+                            <td>
+                                {!isDownloadable && (
+                                    <button onClick={() => handleDownload(prog)}>ダウンロード</button>
+                                )}
+                            </td>
+                        </tr>
+                    )
+                })}
                 </tbody>
             </table>
         </article>

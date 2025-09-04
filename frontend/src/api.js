@@ -25,6 +25,7 @@ const fetchWithAuth = async (url, options = {}) => {
 
     if (response.status === 401) {
         // 認証エラーの場合はトークンを削除してリロード
+        alert('セッションの有効期限が切れました。再度ログインしてください。');
         removeTokens();
         window.location.reload();
         throw new Error('Authentication failed');
@@ -33,4 +34,4 @@ const fetchWithAuth = async (url, options = {}) => {
     return response;
 };
 
-export {getToken, setTokens, removeTokens, fetchWithAuth};
+export {getToken, setTokens, removeTokens, fetchWithAuth, getRadikoToken};
