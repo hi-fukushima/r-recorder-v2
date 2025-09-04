@@ -1,6 +1,10 @@
-import {useState, useEffect} from 'react';
+import React from 'react';
+import {useEffect, useState} from 'react';
+import {Link, useParams} from 'react-router-dom';
+import {fetchWithAuth} from '../api';
 
-function StationList({areaId, authToken, onStationSelect, onBack}) {
+function StationList({onStationSelect}) {
+    const {areaId} = useParams();
     const [stations, setStations] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -9,14 +13,9 @@ function StationList({areaId, authToken, onStationSelect, onBack}) {
         const fetchStations = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`http://localhost:8000/api/stations/${areaId}`, {
-                    headers: {
-                        'x-radiko-authtoken': authToken,
-                    },
-                });
-                if (!response.ok) {
-                    throw new Error('放送局リストの取得に失敗しました。');
-                }
+                // ★★★ fetchをfetchWithAuthに変更 ★★★
+                const response = await fetchWithAuth(`http://localhost:5001/api/stations/${areaId}`);
+                if (!response.ok) throw new Error('放送局リストの取得に失敗');
                 const data = await response.json();
                 setStations(data);
             } catch (error) {
@@ -25,9 +24,8 @@ function StationList({areaId, authToken, onStationSelect, onBack}) {
                 setLoading(false);
             }
         };
-
         fetchStations();
-    }, [areaId, authToken]); // areaIdかauthTokenが変わった時だけ再実行
+    }, [areaId]);
 
     if (loading) {
         return <article aria-busy="true">放送局を読み込み中...</article>;
@@ -36,14 +34,11 @@ function StationList({areaId, authToken, onStationSelect, onBack}) {
     return (
         <article>
             <h2>放送局を選択 ({areaId})</h2>
-            <button onClick={onBack} className="secondary outline">エリア選択に戻る</button>
+            <Link to="/areas">エリア選択に戻る</Link>
             <ul>
                 {stations.map(station => (
                     <li key={station.id}>
-                        {/* クリックされたら onStationSelect を呼び出す */}
-                        <a href="#" onClick={() => onStationSelect(station.id)}>
-                            {station.name}
-                        </a>
+                        <Link to={`/dates/${station.id}`}>{station.name}</Link>
                     </li>
                 ))}
             </ul>

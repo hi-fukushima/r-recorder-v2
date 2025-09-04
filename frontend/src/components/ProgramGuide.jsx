@@ -1,6 +1,11 @@
+import React from 'react';
 import {useState, useEffect} from 'react';
+import {useNavigate, useParams, Link} from 'react-router-dom';
+import {fetchWithAuth} from '../api';
 
-function ProgramGuide({stationId, dateStr, authToken, onBack, onDownloadScheduled}) {
+function ProgramGuide() {
+    const {stationId, dateStr} = useParams();
+    const navigate = useNavigate();
     const [guide, setGuide] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -8,12 +13,8 @@ function ProgramGuide({stationId, dateStr, authToken, onBack, onDownloadSchedule
         const fetchGuide = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`http://localhost:8000/api/guide/${stationId}/${dateStr}`, {
-                    headers: {'x-radiko-authtoken': authToken},
-                });
-                if (!response.ok) {
-                    throw new Error('番組表の取得に失敗しました。');
-                }
+                const response = await fetchWithAuth(`http://localhost:5001/api/guide/${stationId}/${dateStr}`);
+                if (!response.ok) throw new Error('番組表の取得に失敗');
                 const data = await response.json();
                 setGuide(data);
             } catch (error) {
@@ -23,7 +24,7 @@ function ProgramGuide({stationId, dateStr, authToken, onBack, onDownloadSchedule
             }
         };
         fetchGuide();
-    }, [stationId, dateStr, authToken]);
+    }, [stationId, dateStr]);
 
     const handleDownload = async (program) => {
         const payload = {
@@ -35,7 +36,7 @@ function ProgramGuide({stationId, dateStr, authToken, onBack, onDownloadSchedule
         };
 
         try {
-            const response = await fetch('http://localhost:8000/api/download', {
+            const response = await fetchWithAuth('http://localhost:5001/api/download', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload),
@@ -43,7 +44,7 @@ function ProgramGuide({stationId, dateStr, authToken, onBack, onDownloadSchedule
             if (!response.ok) throw new Error('Download request failed');
 
             // ★★★ ここで onDownloadScheduled を呼び出す ★★★
-            onDownloadScheduled();
+            navigate('/status');
         } catch (error) {
             alert(error.message);
         }
@@ -60,7 +61,7 @@ function ProgramGuide({stationId, dateStr, authToken, onBack, onDownloadSchedule
     return (
         <article>
             <h2>番組表 ({guide.station_name} - {dateStr})</h2>
-            <button onClick={onBack} className="secondary outline">日付選択に戻る</button>
+            <Link to={`/dates/${stationId}`}>日付選択に戻る</Link>
             <table>
                 <thead>
                 <tr>

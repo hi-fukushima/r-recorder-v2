@@ -1,12 +1,15 @@
+import React from 'react';
 import {useState, useEffect} from 'react';
+import {Link} from 'react-router-dom';
+import {fetchWithAuth} from '../api';
 
-function StatusPage({onNavClick}) {
+function StatusPage() {
     const [status, setStatus] = useState(null);
     const [loading, setLoading] = useState(true);
 
     const fetchStatus = async () => {
         try {
-            const response = await fetch('http://localhost:8000/api/status');
+            const response = await fetchWithAuth('http://localhost:5001/api/status');
             if (!response.ok) throw new Error('Status fetch failed');
             const data = await response.json();
             setStatus(data);
@@ -34,7 +37,7 @@ function StatusPage({onNavClick}) {
                 <h2>ダウンロード状況</h2>
                 <p>このページは10秒ごとに自動更新されます。</p>
             </hgroup>
-            <button onClick={() => onNavClick('areas')} className="outline">エリア選択に戻る</button>
+            <Link to="/areas" role="button" className="outline">エリア選択に戻る</Link>
 
             <table>
                 <thead>

@@ -1,20 +1,20 @@
-# Node.jsの公式イメージをベースにする
-FROM node:20-alpine
+# --- ビルドステージ ---
+FROM node:20-alpine AS build
 
-# コンテナ内の作業ディレクトリを設定
 WORKDIR /app
-
-# 依存関係のファイルを先にコピー
-COPY package.json package-lock.json* ./
-
-# 依存ライブラリをインストール
+COPY package*.json ./
 RUN npm install
-
-# プロジェクトの残りのファイルをコピー
 COPY . .
+# ★★★ `npm run build`で本番用の静的ファイルを生成 ★★★
+RUN npm run build
 
-# 開発サーバーが使うポートを公開
-EXPOSE 3000
+# --- 配信用ステージ ---
+FROM nginx:alpine
 
-# コンテナ起動時のデフォルトコマンド
-CMD [ "npm", "run", "dev" ]
+# ★★★ ビルドステージで生成した静的ファイルをNGINXの公開ディレクトリにコピー ★★★
+COPY --from=build /app/dist /usr/share/nginx/html
+
+#COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

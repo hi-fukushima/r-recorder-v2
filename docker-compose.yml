@@ -1,21 +1,20 @@
 services:
   backend:
     build: ./backend
-    # FastAPIの開発サーバーを起動
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: gunicorn --bind 0.0.0.0:8000 --workers 2 -k uvicorn.workers.UvicornWorker "app.main:app"
+#    command: gunicorn --bind 0.0.0.0:8000 --workers 2 "app.main:app"
     volumes:
-      - ./backend:/app
       - ./recordings:/recordings
-    ports:
-      # Macの8000番ポートをコンテナの8000番ポートに接続
-      - "8000:8000"
-    tty: true
-  frontend:
+    # ポートは公開しない（NGINX経由でのみアクセス）
+
+  nginx:
+    # frontendのDockerfileを使ってビルドする
     build: ./frontend
-    command: npm run dev -- --host --port 3000
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
     ports:
-      - "3000:3000"
+      - "5001:80"
+    volumes:
+      # プロジェクトルートのnginx/default.confをマウント
+      - ./app/static:/app/static
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend

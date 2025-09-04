@@ -1,3 +1,6 @@
+import React from 'react';
+import {useNavigate} from 'react-router-dom';
+
 const JAPAN_REGIONS = [
     {
         "name": "北海道・東北",
@@ -61,7 +64,9 @@ const JAPAN_REGIONS = [
     }
 ];
 
-function AreaSelector({onAreaSelect}) {
+function AreaSelector() {
+    const navigate = useNavigate();
+
     return (
         <article>
             <hgroup>
@@ -75,7 +80,7 @@ function AreaSelector({onAreaSelect}) {
                     <div className="grid">
                         {region.prefectures.map(area => (
                             <a href="#" key={area.id} role="button" className="secondary outline"
-                               onClick={() => onAreaSelect(area.id)}>
+                               onClick={() => navigate(`/stations/${area.id}`)}>
                                 {area.name}
                             </a>
                         ))}

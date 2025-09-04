@@ -10,11 +10,12 @@ from typing import List, Optional  # ★★★ 型ヒントのために追加 �
 import pytz
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
-from fastapi import FastAPI, Form, HTTPException, Header
+from fastapi import FastAPI, Form, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 
 from .database import get_db_connection
+from .security import create_access_token, get_current_user
 
 # --------------------------------------------------------------------------
 # FastAPIの初期化とグローバル変数
@@ -51,6 +52,12 @@ class TokenData(BaseModel):
     """認証トークンとエリアIDを格納するモデル"""
     auth_token: str
     area_id: str
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str
+    radiko_token: str
 
 
 class Station(BaseModel):
@@ -135,7 +142,8 @@ def radiko_authenticate(mail: str, password: str):
             'X-Radiko-AuthToken': auth_token,
             'X-Radiko-PartialKey': partial_key,
         })
-        res2 = radiko_session.get(f'https://radiko.jp/v2/api/auth2?radiko_session={session_id}', headers=headers, cookies=premium_cookie)
+        res2 = radiko_session.get(f'https://radiko.jp/v2/api/auth2?radiko_session={session_id}', headers=headers,
+                                  cookies=premium_cookie)
         res2.raise_for_status()
 
         area_id = res2.text.split(',')[0]
@@ -248,7 +256,7 @@ def start_download_job(job_id, station_id, station_name, program_title, start_ti
 # --------------------------------------------------------------------------
 # APIエンドポイント
 # --------------------------------------------------------------------------
-@app.post("/api/login", response_model=TokenData, tags=["Auth"])
+@app.post("/api/login", response_model=LoginResponse, tags=["Auth"])
 def login(email: EmailStr = Form(...), password: str = Form(...)):
     global user_email, user_password
     user_email = email
@@ -258,27 +266,36 @@ def login(email: EmailStr = Form(...), password: str = Form(...)):
     conn = get_db_connection()
     status = 'success' if token_data else 'failed'
     conn.execute('INSERT INTO login_history (email, status) VALUES (?, ?)', (email, status))
-    conn.commit();
+    conn.commit()
     conn.close()
+
     if not token_data:
         raise HTTPException(status_code=401, detail="Login failed")
-    return token_data
+
+    # ★★★ JWTアクセス・トークンを生成 ★★★
+    access_token = create_access_token(
+        data={"sub": email}  # "sub"はsubject(主題)の略で、ユーザー識別子を入れるのが一般的
+    )
+
+    return {"access_token": access_token, "token_type": "bearer", "radiko_token": token_data.auth_token}
 
 
 @app.get("/api/stations/{area_id}", response_model=List[Station], tags=["Stations"])
-def get_stations_in_area(area_id: str, x_radiko_authtoken: str = Header(...)):
+def get_stations_in_area(area_id: str, x_radiko_authtoken: str = Header(...),
+                         current_user: str = Depends(get_current_user)):
     """指定されたエリアの放送局リストを取得する"""
     return get_station_list(area_id, x_radiko_authtoken)
 
 
 @app.get("/api/guide/{station_id}/{date_str}", response_model=GuideResponse, tags=["Programs"])
-def get_guide_for_station(station_id: str, date_str: str, x_radiko_authtoken: str = Header(...)):
+def get_guide_for_station(station_id: str, date_str: str, x_radiko_authtoken: str = Header(...),
+                          current_user: str = Depends(get_current_user)):
     """指定された放送局・日付の番組表を取得する"""
     return get_program_guide(station_id, date_str, x_radiko_authtoken)
 
 
 @app.post("/api/download", status_code=202, tags=["Jobs"])
-def schedule_download(request: DownloadRequest):
+def schedule_download(request: DownloadRequest, current_user: str = Depends(get_current_user)):
     """ダウンロードジョブをスケジュールする"""
     job_id = str(uuid.uuid4())
     start_time_dt = datetime.strptime(request.start_time, '%Y%m%d%H%M%S')
@@ -300,7 +317,7 @@ def schedule_download(request: DownloadRequest):
 
 
 @app.get("/api/status", response_model=StatusResponse, tags=["Jobs"])
-def get_status():
+def get_status(current_user: str = Depends(get_current_user)):
     """ダウンロードジョブとログイン履歴を取得する"""
     conn = get_db_connection()
     jobs_raw = conn.execute('SELECT * FROM download_log ORDER BY start_time DESC').fetchall()
