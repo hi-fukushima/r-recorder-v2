@@ -5,6 +5,7 @@ services:
 #    command: gunicorn --bind 0.0.0.0:8000 --workers 2 "app.main:app"
     volumes:
       - ./recordings:/recordings
+      - ./backend/app/r_downloader.db:/app/app/r_downloader.db
     # ポートは公開しない（NGINX経由でのみアクセス）
 
   nginx:
