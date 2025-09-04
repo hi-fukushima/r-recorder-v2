@@ -9,7 +9,7 @@ function StatusPage() {
 
     const fetchStatus = async () => {
         try {
-            const response = await fetchWithAuth('http://localhost:5001/api/status');
+            const response = await fetchWithAuth('status');
             if (!response.ok) throw new Error('Status fetch failed');
             const data = await response.json();
             setStatus(data);

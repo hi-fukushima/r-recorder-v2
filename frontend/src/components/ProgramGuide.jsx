@@ -13,7 +13,7 @@ function ProgramGuide() {
         const fetchGuide = async () => {
             setLoading(true);
             try {
-                const response = await fetchWithAuth(`http://localhost:5001/api/guide/${stationId}/${dateStr}`);
+                const response = await fetchWithAuth(`guide/${stationId}/${dateStr}`);
                 if (!response.ok) throw new Error('番組表の取得に失敗');
                 const data = await response.json();
                 setGuide(data);
@@ -36,7 +36,7 @@ function ProgramGuide() {
         };
 
         try {
-            const response = await fetchWithAuth('http://localhost:5001/api/download', {
+            const response = await fetchWithAuth('download', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload),

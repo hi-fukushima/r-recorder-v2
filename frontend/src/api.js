@@ -21,7 +21,7 @@ const fetchWithAuth = async (url, options = {}) => {
         'X-Radiko-AuthToken': radikoToken,
     };
 
-    const response = await fetch(url, {...options, headers});
+    const response = await fetch(`/api/${url}`, {...options, headers});
 
     if (response.status === 401) {
         // 認証エラーの場合はトークンを削除してリロード

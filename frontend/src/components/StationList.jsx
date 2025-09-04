@@ -14,7 +14,7 @@ function StationList({onStationSelect}) {
             setLoading(true);
             try {
                 // ★★★ fetchをfetchWithAuthに変更 ★★★
-                const response = await fetchWithAuth(`http://localhost:5001/api/stations/${areaId}`);
+                const response = await fetchWithAuth(`stations/${areaId}`);
                 if (!response.ok) throw new Error('放送局リストの取得に失敗');
                 const data = await response.json();
                 setStations(data);

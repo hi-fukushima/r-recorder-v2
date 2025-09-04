@@ -20,7 +20,7 @@ const LoginPage = ({onLogin}) => {
         formData.append('email', email);
         formData.append('password', password);
         try {
-            const response = await fetch('http://localhost:5001/api/login', {
+            const response = await fetch('/api/login', {
                 method: 'POST', body: formData,
             });
             const data = await response.json();
