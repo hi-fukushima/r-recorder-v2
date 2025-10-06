@@ -342,6 +342,10 @@ def start_download_job(job_id, station_id, station_name, program_title, start_ti
 # --------------------------------------------------------------------------
 # APIエンドポイント
 # --------------------------------------------------------------------------
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 @app.post("/api/login", response_model=LoginResponse, tags=["Auth"])
 def login(email: EmailStr = Form(...), password: str = Form(...)):
     global user_email, user_password

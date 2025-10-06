@@ -1,145 +1,234 @@
-import React from 'react';
-import {useState, useEffect} from 'react';
+import type { JSX } from 'react'
+import { useState, type FormEvent } from 'react'
 import {BrowserRouter, Routes, Route, Navigate, useNavigate, useParams, Link} from 'react-router-dom';
-import AreaSelector from './components/AreaSelector';
-import StationList from './components/StationList';
-import DateSelector from './components/DateSelector';
-import ProgramGuide from './components/ProgramGuide';
-import StatusPage from "./components/StatusPage";
-import SearchPage from "./components/SearchPage";
-import {getToken, setTokens, removeTokens} from './api';
 
-// --- ページコンポーネントの定義 ---
-// ログインページ
-const LoginPage = ({onLogin}) => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+import _AreaSelector from './components/AreaSelector'
+import _StationList from './components/StationList'
+import _DateSelector from './components/DateSelector'
+import _ProgramGuide from './components/ProgramGuide'
+import _StatusPage from './components/StatusPage'
+import _SearchPage from './components/SearchPage'
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        const formData = new FormData();
-        formData.append('email', email);
-        formData.append('password', password);
-        try {
-            const response = await fetch('/api/login', {
-                method: 'POST', body: formData,
-            });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.detail || 'Login failed');
-            onLogin(data.access_token, data.radiko_token);
-        } catch (error) {
-            alert(`ログインに失敗しました: ${error.message}`);
-        }
-    };
+import { getToken, setTokens, removeTokens } from './api'
 
-    return (
-        <article>
-            <h1 style={{textAlign: 'center'}}>Radiko ログイン</h1>
-            <form onSubmit={handleSubmit}>
-                <label htmlFor="email">メールアドレス</label>
-                <input type="email" id="email" name="email" placeholder="メールアドレス" required value={email}
-                       onChange={(e) => setEmail(e.target.value)}/>
-                <label htmlFor="password">パスワード</label>
-                <input type="password" id="password" name="password" placeholder="パスワード" required value={password}
-                       onChange={(e) => setPassword(e.target.value)}/>
-                <button type="submit">ログイン</button>
-            </form>
-        </article>
-    );
-};
+import type {
+  AreaSelectorProps,
+  StationListProps,
+  DateSelectorProps,
+  ProgramGuideProps,
+} from './types/stubs'
+import type { FC } from 'react'
 
-// エリア選択ページ
-const AreaPage = () => {
-    const navigate = useNavigate();
-    return <AreaSelector onAreaSelect={(areaId) => navigate(`/stations/${areaId}`)}/>;
-};
+const AreaSelector  = _AreaSelector  as FC<AreaSelectorProps>
+const StationList   = _StationList   as FC<StationListProps>
+const DateSelector  = _DateSelector  as FC<DateSelectorProps>
+const ProgramGuide  = _ProgramGuide  as FC<ProgramGuideProps>
+const StatusPage    = _StatusPage    as FC
+const SearchPage    = _SearchPage    as FC
 
-// 放送局選択ページ
-const StationPage = () => {
-    const {areaId} = useParams();
-    const navigate = useNavigate();
-    return <StationList
-        areaId={areaId}
-        onStationSelect={(stationId) => navigate(`/dates/${stationId}`)}
-    />;
-};
-
-// 日付選択ページ
-const DatePage = () => {
-    const {stationId} = useParams();
-    const navigate = useNavigate();
-    return <DateSelector
-        stationId={stationId}
-        onDateSelect={(dateStr) => navigate(`/guide/${stationId}/${dateStr}`)}
-    />;
-};
-
-// 番組表ページ
-const GuidePage = () => {
-    const {stationId, dateStr} = useParams();
-    const navigate = useNavigate();
-    return <ProgramGuide
-        stationId={stationId}
-        dateStr={dateStr}
-        onDownloadScheduled={() => navigate('/status')}
-    />;
-};
-
-const Search = () => <SearchPage/>;
-
-function App() {
-    // --- 状態管理(State) ---
-    // アプリ起動時にlocalStorageからトークンを読み込む
-    const [authToken, setAuthToken] = useState(getToken());
-
-    const handleLogin = (jwtToken, radikoToken) => {
-        setTokens(jwtToken, radikoToken);
-        setAuthToken(jwtToken);
-    };
-
-    const handleLogout = () => {
-        removeTokens();
-        setAuthToken(null);
-    };
-
-    return (
-        <BrowserRouter>
-            <main className="container">
-                {authToken && (
-                    <nav>
-                        <ul>
-                            <li><strong>R Downloader V2</strong></li>
-                        </ul>
-                        <ul>
-                            <li><Link to="/search">番組検索</Link></li>
-                            <li><Link to="/areas">エリア選択</Link></li>
-                            <li><Link to="/status">ダウンロード状況</Link></li>
-                            <li><a href="#" role="button" className="contrast" onClick={handleLogout}>ログアウト</a>
-                            </li>
-                        </ul>
-                    </nav>
-                )}
-                <Routes>
-                    {!authToken ? (
-                        <>
-                            <Route path="/login" element={<LoginPage onLogin={handleLogin}/>}/>
-                            <Route path="*" element={<Navigate to="/login"/>}/>
-                        </>
-                    ) : (
-                        <>
-                            <Route path="/search" element={<Search/>}/>
-                            <Route path="/areas" element={<AreaPage/>}/>
-                            <Route path="/stations/:areaId" element={<StationPage/>}/>
-                            <Route path="/dates/:stationId" element={<DatePage/>}/>
-                            <Route path="/guide/:stationId/:dateStr" element={<GuidePage/>}/>
-                            <Route path="/status" element={<StatusPage/>}/>
-                            <Route path="*" element={<Navigate to="/areas"/>}/>
-                        </>
-                    )}
-                </Routes>
-            </main>
-        </BrowserRouter>
-    );
+// =====================
+// 型定義
+// =====================
+type LoginPageProps = {
+  onLogin: (jwtToken: string, radikoToken: string) => void
 }
 
-export default App;
+// type AreaSelectorProps = {
+//   onAreaSelect: (areaId: string) => void | Promise<void>
+// }
+//
+// type StationListProps = {
+//   areaId?: string
+//   onStationSelect: (stationId: string) => void | Promise<void>
+// }
+//
+// type DateSelectorProps = {
+//   stationId?: string
+//   onDateSelect: (dateStr: string) => void | Promise<void>
+// }
+//
+// type ProgramGuideProps = {
+//   stationId?: string
+//   dateStr?: string
+//   onDownloadScheduled: () => void | Promise<void>
+// }
+
+// =====================
+// ページコンポーネント
+// =====================
+
+// ログインページ
+const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+  const [email, setEmail] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const formData = new FormData()
+    formData.append('email', email)
+    formData.append('password', password)
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        body: formData,
+      })
+      const data = (await response.json()) as {
+        detail?: string
+        access_token?: string
+        radiko_token?: string
+      }
+      if (!response.ok || !data.access_token || !data.radiko_token) {
+        throw new Error(data.detail || 'Login failed')
+      }
+      onLogin(data.access_token, data.radiko_token)
+    } catch (error: unknown) {
+      const msg =
+        error instanceof Error ? error.message : 'Unknown error occurred'
+      alert(`ログインに失敗しました: ${msg}`)
+    }
+  }
+
+  return (
+    <article>
+      <h1 style={{ textAlign: 'center' }}>Radiko ログイン</h1>
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="email">メールアドレス</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="メールアドレス"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <label htmlFor="password">パスワード</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="パスワード"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button type="submit">ログイン</button>
+      </form>
+    </article>
+  )
+}
+
+// エリア選択ページ
+const AreaPage: React.FC = () => {
+  const navigate = useNavigate()
+  const onAreaSelect: AreaSelectorProps['onAreaSelect'] = (areaId) =>
+    navigate(`/stations/${areaId}`)
+  return <AreaSelector onAreaSelect={onAreaSelect} />
+}
+
+// 放送局選択ページ
+const StationPage: React.FC = () => {
+  const { areaId } = useParams<{ areaId: string }>()
+  const navigate = useNavigate()
+  const onStationSelect: StationListProps['onStationSelect'] = (stationId) =>
+    navigate(`/dates/${stationId}`)
+  return <StationList areaId={areaId} onStationSelect={onStationSelect} />
+}
+
+// 日付選択ページ
+const DatePage: React.FC = () => {
+  const { stationId } = useParams<{ stationId: string }>()
+  const navigate = useNavigate()
+  const onDateSelect: DateSelectorProps['onDateSelect'] = (dateStr) =>
+    navigate(`/guide/${stationId}/${dateStr}`)
+  return <DateSelector stationId={stationId} onDateSelect={onDateSelect} />
+}
+
+// 番組表ページ
+const GuidePage: React.FC = () => {
+  const { stationId, dateStr } = useParams<{ stationId: string; dateStr: string }>()
+  const navigate = useNavigate()
+  const onDownloadScheduled: ProgramGuideProps['onDownloadScheduled'] = () =>
+    navigate('/status')
+  return (
+    <ProgramGuide
+      stationId={stationId}
+      dateStr={dateStr}
+      onDownloadScheduled={onDownloadScheduled}
+    />
+  )
+}
+
+const Search: React.FC = () => <SearchPage />
+
+// =====================
+// ルート
+// =====================
+function App(): JSX.Element {
+  // アプリ起動時に localStorage から読み込み
+  const initial = getToken() as string | null
+  const [authToken, setAuthToken] = useState<string | null>(initial)
+
+  const handleLogin = (jwtToken: string, radikoToken: string) => {
+    setTokens(jwtToken, radikoToken)
+    setAuthToken(jwtToken)
+  }
+
+  const handleLogout = () => {
+    removeTokens()
+    setAuthToken(null)
+  }
+
+  return (
+    <BrowserRouter>
+      <main className="container">
+        {authToken && (
+          <nav>
+            <ul>
+              <li>
+                <strong>R Downloader V2</strong>
+              </li>
+            </ul>
+            <ul>
+              <li>
+                <Link to="/search">番組検索</Link>
+              </li>
+              <li>
+                <Link to="/areas">エリア選択</Link>
+              </li>
+              <li>
+                <Link to="/status">ダウンロード状況</Link>
+              </li>
+              <li>
+                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                <a href="#" role="button" className="contrast" onClick={handleLogout}>
+                  ログアウト
+                </a>
+              </li>
+            </ul>
+          </nav>
+        )}
+        <Routes>
+          {!authToken ? (
+            <>
+              <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+              <Route path="*" element={<Navigate to="/login" />} />
+            </>
+          ) : (
+            <>
+              <Route path="/search" element={<Search />} />
+              <Route path="/areas" element={<AreaPage />} />
+              <Route path="/stations/:areaId" element={<StationPage />} />
+              <Route path="/dates/:stationId" element={<DatePage />} />
+              <Route path="/guide/:stationId/:dateStr" element={<GuidePage />} />
+              <Route path="/status" element={<StatusPage />} />
+              <Route path="*" element={<Navigate to="/areas" />} />
+            </>
+          )}
+        </Routes>
+      </main>
+    </BrowserRouter>
+  )
+}
+
+export default App

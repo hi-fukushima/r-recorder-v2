@@ -1,0 +1,25 @@
+[python]
+framework = fastapi
+tests = pytest
+style = ruff+black
+rules = [
+  "入出力はPydanticモデルで型定義する",
+  "例外はHTTPExceptionでstatus_code/詳細を明確化",
+  "DBアクセスは層を分離（サービス/リポジトリ層を推奨）"
+]
+
+[javascript]
+framework = react
+tests = vitest+rtl
+style = eslint+prettier
+rules = [
+  "状態は上位管理を優先し、propsの型は厳格に（TS）",
+  "fetch層は専用モジュールに分離しテスト可能に"
+]
+
+[security]
+rules = [
+  ".envで機密管理（コード直書き禁止）",
+  "本番CORSは許可ドメイン限定",
+  "PRで依存脆弱性をスキャン"
+]
