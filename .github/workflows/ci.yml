@@ -22,7 +22,7 @@ jobs:
       - name: Install deps
         run: |
           pip install -r requirements.txt
-          pip install pytest pytest-cov ruff black pip-audit
+          pip install pytest pytest-cov ruff black pip-audit httpx
       - name: Lint (ruff)
         run: ruff check .
       - name: Format check (black)
@@ -30,7 +30,7 @@ jobs:
       - name: Security (pip-audit)
         run: pip-audit -r requirements.txt || true
       - name: Test (pytest)
-        run: pytest -q --maxfail=1 --disable-warnings
+        run: pytest -v --maxfail=1 --disable-warnings
 
   frontend:
     runs-on: ubuntu-latest
