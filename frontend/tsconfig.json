@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "jsx": "react-jsx",
+
+    // まず動かすためのトランジション設定（JS混在OK）
+    "allowJs": true,
+    "checkJs": false,
+
+    // React / Vite 周りの互換
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    // 型チェックの強度（必要なら後で厳しく）
+    "strict": false,
+    "noImplicitAny": false,
+
+    // そのほか
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+
+    // テストとNodeの型
+    "types": ["vitest/globals", "node"]
+  },
+  "include": ["src", "vite.config.js", "src/types/**/*.d.ts"]
+}
