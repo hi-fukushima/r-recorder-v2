@@ -15,6 +15,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # トークンの有効期限 (24時間)
 # トークンを"Authorization: Bearer <token>"ヘッダーから受け取る
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+
 # --- JWT生成 ---
 def create_access_token(data: dict):
     to_encode = data.copy()
@@ -22,6 +23,7 @@ def create_access_token(data: dict):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
 
 # --- JWT検証とユーザー取得（依存関係） ---
 def get_current_user(token: str = Depends(oauth2_scheme)):

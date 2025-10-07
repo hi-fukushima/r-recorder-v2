@@ -4,11 +4,13 @@ import sqlite3
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(BASE_DIR, "r_downloader.db")
 
+
 def get_db_connection():
     """データベースへの接続を取得する"""
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 def init_db():
     """データベースのテーブルを初期化（作成）する"""
