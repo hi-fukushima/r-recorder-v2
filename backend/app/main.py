@@ -158,7 +158,7 @@ def radiko_authenticate(mail: str, password: str):
         res1.raise_for_status()
 
         auth_token = res1.headers['X-Radiko-AuthToken']
-        key_length = int(res1.headers['X-Radiko-KeyLength']);
+        key_length = int(res1.headers['X-Radiko-KeyLength'])
         key_offset = int(res1.headers['X-Radiko-KeyOffset'])
 
         radiko_key = "bcd151073c03b352e1ef2fd66c32209da9ca0afa"
@@ -186,9 +186,9 @@ def get_station_list(area_id: str, auth_token: str) -> List[Station]:
     url = f"http://radiko.jp/v3/station/list/{area_id}.xml"
     headers = {"X-Radiko-AuthToken": auth_token}
     try:
-        res = requests.get(url, headers=headers);
+        res = requests.get(url, headers=headers)
         res.raise_for_status()
-        stations = [];
+        stations = []
         root = ET.fromstring(res.content)
         for station in root.findall('station'):
             stations.append(Station(id=station.find('id').text, name=station.find('name').text))
