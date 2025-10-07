@@ -72,15 +72,16 @@ class TestStationsEndpoint:
 
         # 有効なJWTトークンを生成（実際のトークンを使用）
         from app.security import create_access_token
+
         valid_token = create_access_token(data={"sub": "test@example.com"})
 
         # 認証ヘッダーを追加（JWTトークンとRadikoトークンの両方）
         headers = {
             "Authorization": f"Bearer {valid_token}",
-            "X-Radiko-AuthToken": "test_radiko_token"
+            "X-Radiko-AuthToken": "test_radiko_token",
         }
         response = client.get("/api/stations/JP13", headers=headers)
-        
+
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
@@ -118,11 +119,12 @@ class TestSearchEndpoint:
 
         # 有効なJWTトークンを生成
         from app.security import create_access_token
+
         valid_token = create_access_token(data={"sub": "test@example.com"})
 
         headers = {
             "Authorization": f"Bearer {valid_token}",
-            "X-Radiko-AuthToken": "test_radiko_token"
+            "X-Radiko-AuthToken": "test_radiko_token",
         }
         response = client.get("/api/search/test", headers=headers)
 
@@ -153,6 +155,7 @@ class TestStatusEndpoint:
 
         # 有効なJWTトークンを生成
         from app.security import create_access_token
+
         valid_token = create_access_token(data={"sub": "test@example.com"})
 
         headers = {"Authorization": f"Bearer {valid_token}"}

@@ -226,8 +226,9 @@ class TestDatabaseIntegration:
 
         # 有効なJWTトークンを生成
         from app.security import create_access_token
+
         valid_token = create_access_token(data={"sub": "test@example.com"})
-        
+
         # 認証ヘッダーを設定
         headers = {"Authorization": f"Bearer {valid_token}"}
 
