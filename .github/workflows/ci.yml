@@ -30,7 +30,7 @@ jobs:
       - name: Security (pip-audit)
         run: pip-audit -r requirements.txt || true
       - name: Test (pytest)
-        run: pytest -v --maxfail=1 --disable-warnings
+        run: PYTHONPATH=. pytest -v --maxfail=1 --disable-warnings
 
   frontend:
     runs-on: ubuntu-latest
