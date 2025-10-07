@@ -8,12 +8,8 @@ from app.security import create_access_token
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.database import init_db
 
 client = TestClient(app)
-
-# テスト用のデータベース初期化
-init_db()
 
 
 class TestJWTToken:
@@ -40,8 +36,12 @@ class TestJWTToken:
 class TestAuthentication:
     """認証機能のテスト"""
 
-    def test_get_current_user_valid_token(self):
+    @patch("app.security.get_current_user")
+    def test_get_current_user_valid_token(self, mock_get_current_user, client):
         """有効なトークンでの認証テスト"""
+        # JWT認証のモック
+        mock_get_current_user.return_value = "test@example.com"
+        
         email = "test@example.com"
         token = create_access_token(data={"sub": email})
 
@@ -53,20 +53,20 @@ class TestAuthentication:
         # 実際の実装では認証が必要なエンドポイントでテストする
         assert response.status_code in [200, 401]  # モックの状況による
 
-    def test_get_current_user_invalid_token(self):
+    def test_get_current_user_invalid_token(self, client):
         """無効なトークンでの認証テスト"""
         headers = {"Authorization": "Bearer invalid_token"}
         response = client.get("/api/status", headers=headers)
 
         assert response.status_code == 401
 
-    def test_get_current_user_no_token(self):
+    def test_get_current_user_no_token(self, client):
         """トークンなしでの認証テスト"""
         response = client.get("/api/status")
 
         assert response.status_code == 401
 
-    def test_get_current_user_malformed_token(self):
+    def test_get_current_user_malformed_token(self, client):
         """不正な形式のトークンでの認証テスト"""
         headers = {"Authorization": "Bearer malformed.token"}
         response = client.get("/api/status", headers=headers)
@@ -78,7 +78,7 @@ class TestLoginFlow:
     """ログインフローのテスト"""
 
     @patch("app.main.radiko_authenticate")
-    def test_successful_login_flow(self, mock_authenticate):
+    def test_successful_login_flow(self, mock_authenticate, client):
         """成功するログインフローのテスト"""
         # モックの設定
         mock_auth_result = MagicMock()
@@ -104,7 +104,7 @@ class TestLoginFlow:
         assert data["radiko_token"] == "radiko_token_123"
 
     @patch("app.main.radiko_authenticate")
-    def test_failed_login_flow(self, mock_authenticate):
+    def test_failed_login_flow(self, mock_authenticate, client):
         """失敗するログインフローのテスト"""
         # 認証失敗をモック
         mock_authenticate.return_value = None

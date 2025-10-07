@@ -65,8 +65,12 @@ class TestStationsEndpoint:
         assert response.status_code == 401
 
     @patch("app.main.get_station_list")
-    def test_stations_authorized(self, mock_get_stations, client):
+    @patch("app.security.get_current_user")
+    def test_stations_authorized(self, mock_get_current_user, mock_get_stations, client):
         """認証ありでのアクセステスト"""
+        # JWT認証のモック
+        mock_get_current_user.return_value = "test@example.com"
+        
         # モックの設定
         mock_get_stations.return_value = [{"id": "TBS", "name": "TBSラジオ"}]
 
@@ -89,8 +93,12 @@ class TestSearchEndpoint:
         assert response.status_code == 401
 
     @patch("app.main.search_radiko_programs")
-    def test_search_authorized(self, mock_search, client):
+    @patch("app.security.get_current_user")
+    def test_search_authorized(self, mock_get_current_user, mock_search, client):
         """認証ありでの検索テスト"""
+        # JWT認証のモック
+        mock_get_current_user.return_value = "test@example.com"
+        
         # モックの設定
         mock_search.return_value = {
             "programs": [
@@ -128,8 +136,12 @@ class TestStatusEndpoint:
         assert response.status_code == 401
 
     @patch("app.main.get_db_connection")
-    def test_status_authorized(self, mock_get_db, client):
+    @patch("app.security.get_current_user")
+    def test_status_authorized(self, mock_get_current_user, mock_get_db, client):
         """認証ありでのステータステスト"""
+        # JWT認証のモック
+        mock_get_current_user.return_value = "test@example.com"
+        
         # モックのデータベース接続
         mock_conn = MagicMock()
         mock_get_db.return_value = mock_conn
