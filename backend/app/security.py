@@ -9,7 +9,7 @@ from jose import JWTError, jwt
 # SECRET_KEYは.envファイルから読み込むのが望ましい
 SECRET_KEY = os.getenv("SECRET_KEY", "a_very_secret_key_that_should_be_in_env_file")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # トークンの有効期限 (24時間)
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # トークンの有効期限 (24時間)
 
 # --- FastAPIのセキュリティ機能 ---
 # トークンを"Authorization: Bearer <token>"ヘッダーから受け取る
