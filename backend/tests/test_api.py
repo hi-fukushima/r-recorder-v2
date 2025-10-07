@@ -66,11 +66,13 @@ class TestStationsEndpoint:
 
     @patch("app.main.get_station_list")
     @patch("app.security.get_current_user")
-    def test_stations_authorized(self, mock_get_current_user, mock_get_stations, client):
+    def test_stations_authorized(
+        self, mock_get_current_user, mock_get_stations, client
+    ):
         """認証ありでのアクセステスト"""
         # JWT認証のモック
         mock_get_current_user.return_value = "test@example.com"
-        
+
         # モックの設定
         mock_get_stations.return_value = [{"id": "TBS", "name": "TBSラジオ"}]
 
@@ -98,7 +100,7 @@ class TestSearchEndpoint:
         """認証ありでの検索テスト"""
         # JWT認証のモック
         mock_get_current_user.return_value = "test@example.com"
-        
+
         # モックの設定
         mock_search.return_value = {
             "programs": [
@@ -141,7 +143,7 @@ class TestStatusEndpoint:
         """認証ありでのステータステスト"""
         # JWT認証のモック
         mock_get_current_user.return_value = "test@example.com"
-        
+
         # モックのデータベース接続
         mock_conn = MagicMock()
         mock_get_db.return_value = mock_conn

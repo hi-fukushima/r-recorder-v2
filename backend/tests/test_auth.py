@@ -41,7 +41,7 @@ class TestAuthentication:
         """有効なトークンでの認証テスト"""
         # JWT認証のモック
         mock_get_current_user.return_value = "test@example.com"
-        
+
         email = "test@example.com"
         token = create_access_token(data={"sub": email})
 
