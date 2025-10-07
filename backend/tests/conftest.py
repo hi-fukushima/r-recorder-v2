@@ -2,6 +2,7 @@
 Pytest設定ファイル
 テスト用のフィクスチャとセットアップを定義
 """
+
 import pytest
 import tempfile
 import os
@@ -15,13 +16,13 @@ from app.database import init_db
 def test_db():
     """テスト用のデータベースファイルを作成"""
     # 一時的なデータベースファイルを作成
-    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as tmp:
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:
         db_path = tmp.name
-    
+
     # 環境変数を設定してテスト用データベースを使用
-    original_db = os.environ.get('DATABASE_PATH')
-    os.environ['DATABASE_PATH'] = db_path
-    
+    original_db = os.environ.get("DATABASE_PATH")
+    os.environ["DATABASE_PATH"] = db_path
+
     try:
         # データベースを初期化
         init_db()
@@ -29,10 +30,10 @@ def test_db():
     finally:
         # クリーンアップ
         if original_db:
-            os.environ['DATABASE_PATH'] = original_db
+            os.environ["DATABASE_PATH"] = original_db
         else:
-            os.environ.pop('DATABASE_PATH', None)
-        
+            os.environ.pop("DATABASE_PATH", None)
+
         if os.path.exists(db_path):
             os.unlink(db_path)
 
