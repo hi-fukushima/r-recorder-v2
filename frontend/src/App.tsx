@@ -1,4 +1,3 @@
-import type { JSX } from 'react'
 import { useState, type FormEvent } from 'react'
 import {BrowserRouter, Routes, Route, Navigate, useNavigate, useParams, Link} from 'react-router-dom';
 
@@ -17,14 +16,13 @@ import type {
   DateSelectorProps,
   ProgramGuideProps,
 } from './types/stubs'
-import type { FC } from 'react'
 
-const AreaSelector  = _AreaSelector  as FC<AreaSelectorProps>
-const StationList   = _StationList   as FC<StationListProps>
-const DateSelector  = _DateSelector  as FC<DateSelectorProps>
-const ProgramGuide  = _ProgramGuide  as FC<ProgramGuideProps>
-const StatusPage    = _StatusPage    as FC
-const SearchPage    = _SearchPage    as FC
+const AreaSelector  = _AreaSelector  as React.FC<AreaSelectorProps>
+const StationList   = _StationList   as React.FC<StationListProps>
+const DateSelector  = _DateSelector  as React.FC<DateSelectorProps>
+const ProgramGuide  = _ProgramGuide  as React.FC<ProgramGuideProps>
+const StatusPage    = _StatusPage    as React.FC
+const SearchPage    = _SearchPage    as React.FC
 
 // =====================
 // 型定義
@@ -32,26 +30,6 @@ const SearchPage    = _SearchPage    as FC
 type LoginPageProps = {
   onLogin: (jwtToken: string, radikoToken: string) => void
 }
-
-// type AreaSelectorProps = {
-//   onAreaSelect: (areaId: string) => void | Promise<void>
-// }
-//
-// type StationListProps = {
-//   areaId?: string
-//   onStationSelect: (stationId: string) => void | Promise<void>
-// }
-//
-// type DateSelectorProps = {
-//   stationId?: string
-//   onDateSelect: (dateStr: string) => void | Promise<void>
-// }
-//
-// type ProgramGuideProps = {
-//   stationId?: string
-//   dateStr?: string
-//   onDownloadScheduled: () => void | Promise<void>
-// }
 
 // =====================
 // ページコンポーネント
@@ -164,7 +142,7 @@ const Search: React.FC = () => <SearchPage />
 // =====================
 // ルート
 // =====================
-function App(): JSX.Element {
+function App() {
   // アプリ起動時に localStorage から読み込み
   const initial = getToken() as string | null
   const [authToken, setAuthToken] = useState<string | null>(initial)
