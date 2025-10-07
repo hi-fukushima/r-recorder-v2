@@ -2,18 +2,13 @@
 APIエンドポイントのテスト
 """
 
-from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
-
-from app.main import app
-
-client = TestClient(app)
 
 
 class TestHealthEndpoint:
     """ヘルスチェックエンドポイントのテスト"""
 
-    def test_health_check(self):
+    def test_health_check(self, client):
         """ヘルスチェックが正常に動作することを確認"""
         response = client.get("/health")
         assert response.status_code == 200
@@ -23,13 +18,13 @@ class TestHealthEndpoint:
 class TestLoginEndpoint:
     """ログインエンドポイントのテスト"""
 
-    def test_login_missing_credentials(self):
+    def test_login_missing_credentials(self, client):
         """認証情報が不足している場合のテスト"""
         response = client.post("/api/login")
         assert response.status_code == 422  # Validation Error
 
     @patch("app.main.radiko_authenticate")
-    def test_login_success(self, mock_authenticate):
+    def test_login_success(self, mock_authenticate, client):
         """ログイン成功のテスト"""
         # モックの設定
         mock_authenticate.return_value = MagicMock(
@@ -48,7 +43,7 @@ class TestLoginEndpoint:
         assert data["token_type"] == "bearer"
 
     @patch("app.main.radiko_authenticate")
-    def test_login_failure(self, mock_authenticate):
+    def test_login_failure(self, mock_authenticate, client):
         """ログイン失敗のテスト"""
         # モックの設定（認証失敗）
         mock_authenticate.return_value = None
@@ -64,13 +59,13 @@ class TestLoginEndpoint:
 class TestStationsEndpoint:
     """放送局エンドポイントのテスト"""
 
-    def test_stations_unauthorized(self):
+    def test_stations_unauthorized(self, client):
         """認証なしでのアクセステスト"""
         response = client.get("/api/stations/JP13")
         assert response.status_code == 401
 
     @patch("app.main.get_station_list")
-    def test_stations_authorized(self, mock_get_stations):
+    def test_stations_authorized(self, mock_get_stations, client):
         """認証ありでのアクセステスト"""
         # モックの設定
         mock_get_stations.return_value = [{"id": "TBS", "name": "TBSラジオ"}]
@@ -88,13 +83,13 @@ class TestStationsEndpoint:
 class TestSearchEndpoint:
     """検索エンドポイントのテスト"""
 
-    def test_search_unauthorized(self):
+    def test_search_unauthorized(self, client):
         """認証なしでの検索テスト"""
         response = client.get("/api/search/test")
         assert response.status_code == 401
 
     @patch("app.main.search_radiko_programs")
-    def test_search_authorized(self, mock_search):
+    def test_search_authorized(self, mock_search, client):
         """認証ありでの検索テスト"""
         # モックの設定
         mock_search.return_value = {
@@ -127,13 +122,13 @@ class TestSearchEndpoint:
 class TestStatusEndpoint:
     """ステータスエンドポイントのテスト"""
 
-    def test_status_unauthorized(self):
+    def test_status_unauthorized(self, client):
         """認証なしでのステータステスト"""
         response = client.get("/api/status")
         assert response.status_code == 401
 
     @patch("app.main.get_db_connection")
-    def test_status_authorized(self, mock_get_db):
+    def test_status_authorized(self, mock_get_db, client):
         """認証ありでのステータステスト"""
         # モックのデータベース接続
         mock_conn = MagicMock()

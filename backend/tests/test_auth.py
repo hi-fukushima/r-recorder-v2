@@ -8,8 +8,12 @@ from app.security import create_access_token
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.database import init_db
 
 client = TestClient(app)
+
+# テスト用のデータベース初期化
+init_db()
 
 
 class TestJWTToken:

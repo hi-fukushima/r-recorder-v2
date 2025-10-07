@@ -7,6 +7,8 @@ import tempfile
 import os
 from unittest.mock import patch, MagicMock
 
+from app.database import get_db_connection, init_db
+
 
 class TestDatabaseConnection:
     """データベース接続のテスト"""
