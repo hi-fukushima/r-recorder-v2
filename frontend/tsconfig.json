@@ -18,7 +18,6 @@
     // 型チェックの強度（必要なら後で厳しく）
     "strict": false,
     "noImplicitAny": false,
-    "suppressImplicitAnyIndexErrors": true,
 
     // そのほか
     "resolveJsonModule": true,
