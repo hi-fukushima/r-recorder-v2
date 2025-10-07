@@ -40,12 +40,12 @@ app.add_middleware(
 scheduler = BackgroundScheduler(timezone="Asia/Tokyo")
 scheduler.start()
 
-JST = pytz.timezone('Asia/Tokyo')
+JST = pytz.timezone("Asia/Tokyo")
 
 # 全国放送局IDと名前の対応表をキャッシュするためのグローバル変数
 station_id_to_name_cache: Dict[str, str] = {}
 ALL_AREA_IDS = [f"JP{i}" for i in range(1, 48)]
-SEARCH_RESULTS_PER_PAGE = 10 # 検索結果の1ページあたりの件数
+SEARCH_RESULTS_PER_PAGE = 10  # 検索結果の1ページあたりの件数
 
 radiko_session = None
 user_email = None
@@ -143,37 +143,43 @@ def radiko_authenticate(mail: str, password: str):
     # (以前のコードとほぼ同じ。エラーハンドリングをFastAPI流に)
     try:
         radiko_session = requests.Session()
-        res_login = radiko_session.post('https://radiko.jp/v4/api/member/login', data={'mail': mail, 'pass': password})
+        res_login = radiko_session.post("https://radiko.jp/v4/api/member/login", data={"mail": mail, "pass": password})
         res_login.raise_for_status()
         premium_cookie = radiko_session.cookies
         session_id = res_login.json()["radiko_session"]
         print(session_id)
 
         headers = {
-            'User-Agent': 'curl/7.52.1', 'Accept': '*/*',
-            'X-Radiko-App': 'pc_html5', 'X-Radiko-App-Version': '0.0.1',
-            'X-Radiko-Device': 'pc', 'X-Radiko-User': 'dummy_user'
+            "User-Agent": "curl/7.52.1",
+            "Accept": "*/*",
+            "X-Radiko-App": "pc_html5",
+            "X-Radiko-App-Version": "0.0.1",
+            "X-Radiko-Device": "pc",
+            "X-Radiko-User": "dummy_user",
         }
-        res1 = radiko_session.get('https://radiko.jp/v2/api/auth1', headers=headers, cookies=premium_cookie)
+        res1 = radiko_session.get("https://radiko.jp/v2/api/auth1", headers=headers, cookies=premium_cookie)
         res1.raise_for_status()
 
-        auth_token = res1.headers['X-Radiko-AuthToken']
-        key_length = int(res1.headers['X-Radiko-KeyLength'])
-        key_offset = int(res1.headers['X-Radiko-KeyOffset'])
+        auth_token = res1.headers["X-Radiko-AuthToken"]
+        key_length = int(res1.headers["X-Radiko-KeyLength"])
+        key_offset = int(res1.headers["X-Radiko-KeyOffset"])
 
         radiko_key = "bcd151073c03b352e1ef2fd66c32209da9ca0afa"
-        partial_key_bytes = radiko_key[key_offset:key_offset + key_length].encode('utf-8')
-        partial_key = base64.b64encode(partial_key_bytes).decode('utf-8')
+        partial_key_bytes = radiko_key[key_offset : key_offset + key_length].encode("utf-8")
+        partial_key = base64.b64encode(partial_key_bytes).decode("utf-8")
 
         headers.update({
-            'X-Radiko-AuthToken': auth_token,
-            'X-Radiko-PartialKey': partial_key,
+            "X-Radiko-AuthToken": auth_token,
+            "X-Radiko-PartialKey": partial_key,
         })
-        res2 = radiko_session.get(f'https://radiko.jp/v2/api/auth2?radiko_session={session_id}', headers=headers,
-                                  cookies=premium_cookie)
+        res2 = radiko_session.get(
+            f"https://radiko.jp/v2/api/auth2?radiko_session={session_id}",
+            headers=headers,
+            cookies=premium_cookie,
+        )
         res2.raise_for_status()
 
-        area_id = res2.text.split(',')[0]
+        area_id = res2.text.split(",")[0]
         return TokenData(auth_token=auth_token, area_id=area_id)
     except requests.exceptions.RequestException as e:
         # FastAPIではHTTPExceptionをraiseするのが一般的
@@ -190,8 +196,8 @@ def get_station_list(area_id: str, auth_token: str) -> List[Station]:
         res.raise_for_status()
         stations = []
         root = ET.fromstring(res.content)
-        for station in root.findall('station'):
-            stations.append(Station(id=station.find('id').text, name=station.find('name').text))
+        for station in root.findall("station"):
+            stations.append(Station(id=station.find("id").text, name=station.find("name").text))
         return stations
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"放送局リストの取得に失敗: {e}")
@@ -218,15 +224,15 @@ def get_program_guide(station_id: str, date_str: str, auth_token: str) -> GuideR
         res.raise_for_status()
         programs = []
         root = ET.fromstring(res.content)
-        station_name = root.find('.//station/name').text
-        for prog in root.findall('.//prog'):
-            image_elem = prog.find('img')
+        station_name = root.find(".//station/name").text
+        for prog in root.findall(".//prog"):
+            image_elem = prog.find("img")
             programs.append(Program(
-                title=prog.find('title').text,
-                start_time=JST.localize(datetime.strptime(prog.get('ft'), '%Y%m%d%H%M%S')),
-                end_time=JST.localize(datetime.strptime(prog.get('to'), '%Y%m%d%H%M%S')),
-                duration=int(prog.get('dur')),
-                pfm=prog.find('pfm').text if prog.find('pfm') is not None else '',
+                title=prog.find("title").text,
+                start_time=JST.localize(datetime.strptime(prog.get("ft"), "%Y%m%d%H%M%S")),
+                end_time=JST.localize(datetime.strptime(prog.get("to"), "%Y%m%d%H%M%S")),
+                duration=int(prog.get("dur")),
+                pfm=prog.find("pfm").text if prog.find("pfm") is not None else "",
                 image_url=image_elem.text if image_elem is not None else None
             ))
         return GuideResponse(station_name=station_name, programs=programs)
