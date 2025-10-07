@@ -184,7 +184,7 @@ class TestDatabaseOperations:
 class TestDatabaseIntegration:
     """データベース統合テスト"""
 
-    @patch("app.database.get_db_connection")
+    @patch("app.main.get_db_connection")
     def test_login_history_recording(self, mock_get_db):
         """ログイン履歴の記録テスト"""
         # モックのデータベース接続
@@ -211,7 +211,7 @@ class TestDatabaseIntegration:
             mock_conn.commit.assert_called_once()
             mock_conn.close.assert_called_once()
 
-    @patch("app.database.get_db_connection")
+    @patch("app.main.get_db_connection")
     def test_download_job_logging(self, mock_get_db):
         """ダウンロードジョブのログ記録テスト"""
         # モックのデータベース接続
@@ -224,8 +224,12 @@ class TestDatabaseIntegration:
 
         client = TestClient(app)
 
+        # 有効なJWTトークンを生成
+        from app.security import create_access_token
+        valid_token = create_access_token(data={"sub": "test@example.com"})
+        
         # 認証ヘッダーを設定
-        headers = {"Authorization": "Bearer test_token"}
+        headers = {"Authorization": f"Bearer {valid_token}"}
 
         download_data = {
             "station_id": "TBS",

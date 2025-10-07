@@ -65,21 +65,22 @@ class TestStationsEndpoint:
         assert response.status_code == 401
 
     @patch("app.main.get_station_list")
-    @patch("app.security.get_current_user")
-    def test_stations_authorized(
-        self, mock_get_current_user, mock_get_stations, client
-    ):
+    def test_stations_authorized(self, mock_get_stations, client):
         """認証ありでのアクセステスト"""
-        # JWT認証のモック
-        mock_get_current_user.return_value = "test@example.com"
-
         # モックの設定
         mock_get_stations.return_value = [{"id": "TBS", "name": "TBSラジオ"}]
 
-        # 認証ヘッダーを追加
-        headers = {"X-Radiko-AuthToken": "test_token"}
-        response = client.get("/api/stations/JP13", headers=headers)
+        # 有効なJWTトークンを生成（実際のトークンを使用）
+        from app.security import create_access_token
+        valid_token = create_access_token(data={"sub": "test@example.com"})
 
+        # 認証ヘッダーを追加（JWTトークンとRadikoトークンの両方）
+        headers = {
+            "Authorization": f"Bearer {valid_token}",
+            "X-Radiko-AuthToken": "test_radiko_token"
+        }
+        response = client.get("/api/stations/JP13", headers=headers)
+        
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
@@ -95,12 +96,8 @@ class TestSearchEndpoint:
         assert response.status_code == 401
 
     @patch("app.main.search_radiko_programs")
-    @patch("app.security.get_current_user")
-    def test_search_authorized(self, mock_get_current_user, mock_search, client):
+    def test_search_authorized(self, mock_search, client):
         """認証ありでの検索テスト"""
-        # JWT認証のモック
-        mock_get_current_user.return_value = "test@example.com"
-
         # モックの設定
         mock_search.return_value = {
             "programs": [
@@ -119,7 +116,14 @@ class TestSearchEndpoint:
             "total_pages": 1,
         }
 
-        headers = {"X-Radiko-AuthToken": "test_token"}
+        # 有効なJWTトークンを生成
+        from app.security import create_access_token
+        valid_token = create_access_token(data={"sub": "test@example.com"})
+
+        headers = {
+            "Authorization": f"Bearer {valid_token}",
+            "X-Radiko-AuthToken": "test_radiko_token"
+        }
         response = client.get("/api/search/test", headers=headers)
 
         assert response.status_code == 200
@@ -138,12 +142,8 @@ class TestStatusEndpoint:
         assert response.status_code == 401
 
     @patch("app.main.get_db_connection")
-    @patch("app.security.get_current_user")
-    def test_status_authorized(self, mock_get_current_user, mock_get_db, client):
+    def test_status_authorized(self, mock_get_db, client):
         """認証ありでのステータステスト"""
-        # JWT認証のモック
-        mock_get_current_user.return_value = "test@example.com"
-
         # モックのデータベース接続
         mock_conn = MagicMock()
         mock_get_db.return_value = mock_conn
@@ -151,7 +151,11 @@ class TestStatusEndpoint:
         # モックのクエリ結果
         mock_conn.execute.return_value.fetchall.return_value = []
 
-        headers = {"X-Radiko-AuthToken": "test_token"}
+        # 有効なJWTトークンを生成
+        from app.security import create_access_token
+        valid_token = create_access_token(data={"sub": "test@example.com"})
+
+        headers = {"Authorization": f"Bearer {valid_token}"}
         response = client.get("/api/status", headers=headers)
 
         assert response.status_code == 200
