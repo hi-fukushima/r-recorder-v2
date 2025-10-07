@@ -27,7 +27,7 @@ jobs:
       - name: Format check (black)
         run: black --check .
       - name: Security (pip-audit)
-        run: pip-audit -r requirements.txt || true
+        run: pip-audit -r requirements.txt
       - name: Test (pytest)
         run: pytest -q --maxfail=1 --disable-warnings
 
@@ -47,8 +47,9 @@ jobs:
         run: npm ci
       - name: Lint
         run: npm run lint --if-present
-      - name: Test (← テスト導入後に有効化)
-        if: ${{ false }}
+      - name: Security audit
+        run: npm audit --audit-level=moderate
+      - name: Test
         run: npm test -- --run
       - name: Build
         run: npm run build
