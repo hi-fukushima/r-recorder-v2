@@ -3,8 +3,11 @@ import {useState, useEffect} from 'react';
 import {useNavigate, useParams, Link} from 'react-router-dom';
 import {fetchWithAuth, getRadikoToken} from '../api';
 
-function ProgramGuide() {
-    const {stationId, dateStr} = useParams();
+function ProgramGuide({ stationId: propStationId, dateStr: propDateStr, areaId: propAreaId }) {
+    const params = useParams();
+    const stationId = propStationId ?? params.stationId;
+    const dateStr = propDateStr ?? params.dateStr;
+    const areaId = propAreaId ?? params.areaId;
     const navigate = useNavigate();
     const [guide, setGuide] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -64,7 +67,7 @@ function ProgramGuide() {
     return (
         <article>
             <h2>番組表 ({guide.station_name} - {dateStr})</h2>
-            <Link to={`/dates/${stationId}`}>日付選択に戻る</Link>
+            <Link to={areaId ? `/dates/${areaId}/${stationId}` : '/areas'}>日付選択に戻る</Link>
             <table>
                 <thead>
                 <tr>

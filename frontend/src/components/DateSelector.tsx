@@ -1,12 +1,12 @@
 import React from 'react';
 import {useNavigate, useParams, Link} from 'react-router-dom';
 
-function DateSelector() {
-    const {stationId} = useParams();
+function DateSelector({ areaId, stationId, onDateSelect }) {
+    // propsで受け、URL変化に依存しない
     const navigate = useNavigate();
 
     // 今日から過去7日間の日付オブジェクトの配列を生成
-    const dates = Array.from({length: 7}, (_, i) => {
+    const dates = Array.from({length: 8}, (_, i) => {
         const date = new Date();
         date.setDate(date.getDate() - i);
         return date;
@@ -23,14 +23,22 @@ function DateSelector() {
     return (
         <article>
             <h2>日付を選択 ({stationId})</h2>
-            <Link to={`/stations/${stationId.substring(0, 4)}`}>放送局選択に戻る</Link>
+            <Link to={`/stations/${areaId}`}>放送局選択に戻る</Link>
             <div className="grid" style={{marginTop: '1rem'}}>
                 {dates.map(date => (
                     <a
                         href="#"
                         key={formatDate(date)}
                         role="button"
-                        onClick={() => navigate(`/guide/${stationId}/${formatDate(date)}`)}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            const dateStr = formatDate(date);
+                            if (onDateSelect) {
+                                onDateSelect(dateStr);
+                            } else {
+                                navigate(`/guide/${stationId}/${dateStr}/${areaId}`);
+                            }
+                        }}
                     >
                         {date.toLocaleDateString('ja-JP', {month: 'long', day: 'numeric', weekday: 'short'})}
                     </a>

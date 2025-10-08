@@ -38,7 +38,7 @@ function StationList({onStationSelect}) {
             <ul>
                 {stations.map(station => (
                     <li key={station.id}>
-                        <Link to={`/dates/${station.id}`}>{station.name}</Link>
+                        <Link to={`/dates/${areaId}/${station.id}`}>{station.name}</Link>
                     </li>
                 ))}
             </ul>

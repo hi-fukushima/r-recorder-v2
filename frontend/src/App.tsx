@@ -109,22 +109,22 @@ const StationPage: React.FC = () => {
   const { areaId } = useParams<{ areaId: string }>()
   const navigate = useNavigate()
   const onStationSelect: StationListProps['onStationSelect'] = (stationId) =>
-    navigate(`/dates/${stationId}`)
+    navigate(`/dates/${areaId}/${stationId}`)
   return <StationList areaId={areaId} onStationSelect={onStationSelect} />
 }
 
 // 日付選択ページ
 const DatePage: React.FC = () => {
-  const { stationId } = useParams<{ stationId: string }>()
+  const { areaId, stationId } = useParams<{ areaId: string; stationId: string }>()
   const navigate = useNavigate()
   const onDateSelect: DateSelectorProps['onDateSelect'] = (dateStr) =>
-    navigate(`/guide/${stationId}/${dateStr}`)
-  return <DateSelector stationId={stationId} onDateSelect={onDateSelect} />
+    navigate(`/guide/${stationId}/${dateStr}/${areaId}`)
+  return <DateSelector areaId={areaId} stationId={stationId} onDateSelect={onDateSelect} />
 }
 
 // 番組表ページ
 const GuidePage: React.FC = () => {
-  const { stationId, dateStr } = useParams<{ stationId: string; dateStr: string }>()
+  const { stationId, dateStr, areaId } = useParams<{ stationId: string; dateStr: string; areaId: string }>()
   const navigate = useNavigate()
   const onDownloadScheduled: ProgramGuideProps['onDownloadScheduled'] = () =>
     navigate('/status')
@@ -132,6 +132,7 @@ const GuidePage: React.FC = () => {
     <ProgramGuide
       stationId={stationId}
       dateStr={dateStr}
+      areaId={areaId}
       onDownloadScheduled={onDownloadScheduled}
     />
   )
@@ -197,8 +198,8 @@ function App() {
               <Route path="/search" element={<Search />} />
               <Route path="/areas" element={<AreaPage />} />
               <Route path="/stations/:areaId" element={<StationPage />} />
-              <Route path="/dates/:stationId" element={<DatePage />} />
-              <Route path="/guide/:stationId/:dateStr" element={<GuidePage />} />
+              <Route path="/dates/:areaId/:stationId" element={<DatePage />} />
+              <Route path="/guide/:stationId/:dateStr/:areaId" element={<GuidePage />} />
               <Route path="/status" element={<StatusPage />} />
               <Route path="*" element={<Navigate to="/areas" />} />
             </>
