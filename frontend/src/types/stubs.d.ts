@@ -21,6 +21,7 @@ declare module './components/StationList' {
 
 // DateSelector
 export type DateSelectorProps = Partial<Record<string, any>> & {
+  areaId?: string
   stationId?: string
   onDateSelect: (dateStr: string) => void | Promise<void>
 }
@@ -33,6 +34,7 @@ declare module './components/DateSelector' {
 export type ProgramGuideProps = Partial<Record<string, any>> & {
   stationId?: string
   dateStr?: string
+  areaId?: string
   onDownloadScheduled: () => void | Promise<void>
 }
 declare module './components/ProgramGuide' {
