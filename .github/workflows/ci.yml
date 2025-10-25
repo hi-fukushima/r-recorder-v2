@@ -33,6 +33,7 @@ jobs:
         run: PYTHONPATH=. pytest -v --maxfail=1 --disable-warnings
 
   frontend:
+    needs: backend
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: frontend } }
     steps:
